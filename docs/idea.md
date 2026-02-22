@@ -263,7 +263,7 @@ w_{ij} = \frac{1}{|P(i)|},
 
 ### C. 長尾/真實分布（看 mismatch 最明顯場景）
 
-* **CIFAR-100-LT**（人工長尾，依常見 long-tail protocol）與 **ImageNet-LT**（OLTR benchmark） ([openaccess.thecvf.com][8])
+* **CIFAR-100/10-LT**（人工長尾，依常見 long-tail protocol）與 **ImageNet-LT**（OLTR benchmark） ([openaccess.thecvf.com][8])
 * **iNaturalist 2018**：官方描述即強調 fine-grained + high class imbalance + longer tail。 ([Google Sites][9])
 
 ### D. 穩健性評估

@@ -1,0 +1,9 @@
+# Minimal runtime deps for SupCon/RASCAL pretrain + linear eval
+# Install PyTorch separately if you need a specific CUDA build.
+timm
+pandas
+pyarrow
+Pillow
+requests
+# Optional: only needed for HuggingFace-backed datasets (e.g., tiny_imagenet)
+datasets
