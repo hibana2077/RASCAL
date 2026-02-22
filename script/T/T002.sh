@@ -17,6 +17,7 @@ export HF_HOME="/scratch/yp87/sl5952/CARROT/.cache"
 export HF_HUB_OFFLINE=1
 
 cd ../..
+mkdir -p logs
 python3 src/train_rascal.py --method rascal --dataset_name cifar10 --data_root ./data \
   --epochs 200 --batch_size 128 --model resnet50 --feat_dim 128 --temp 0.1 \
   --print_freq 100 \
