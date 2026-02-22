@@ -26,6 +26,8 @@ from train_utils import (
     warmup_learning_rate,
     set_optimizer,
     save_model,
+    set_seed,
+    seed_worker,
 )
 
 
@@ -82,6 +84,17 @@ def parse_option():
     parser.add_argument("--cosine", action="store_true")
     parser.add_argument("--warm", action="store_true")
     parser.add_argument("--trial", type=str, default="0")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="random seed; set to -1 to disable seeding",
+    )
+    parser.add_argument(
+        "--deterministic",
+        action="store_true",
+        help="force deterministic algorithms (slower; may error on nondeterministic ops)",
+    )
     parser.add_argument(
         "--max_steps",
         type=int,
@@ -145,6 +158,11 @@ def set_loader(opt):
         return_index=True,
     )
 
+    generator = None
+    if opt.seed is not None and opt.seed >= 0:
+        generator = torch.Generator()
+        generator.manual_seed(opt.seed)
+
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
         batch_size=opt.batch_size,
@@ -152,6 +170,8 @@ def set_loader(opt):
         num_workers=opt.num_workers,
         pin_memory=True,
         drop_last=True,
+        worker_init_fn=seed_worker if generator is not None else None,
+        generator=generator,
     )
 
     return train_loader
@@ -175,7 +195,8 @@ def set_model_and_loss(opt, num_samples: int):
             model.encoder = torch.nn.DataParallel(model.encoder)
         model = model.cuda()
         criterion = criterion.cuda()
-        cudnn.benchmark = True
+        cudnn.benchmark = not opt.deterministic
+        cudnn.deterministic = bool(opt.deterministic)
 
     return model, criterion
 
@@ -240,6 +261,11 @@ def train_one_epoch(train_loader, model, criterion, optimizer, epoch, opt):
 
 def main():
     opt = parse_option()
+
+    set_seed(opt.seed, deterministic=opt.deterministic)
+    if opt.seed is not None and opt.seed >= 0:
+        print(f"Seed: {opt.seed} (deterministic={opt.deterministic})")
+
     train_loader = set_loader(opt)
     model, criterion = set_model_and_loss(opt, num_samples=len(train_loader.dataset))
     optimizer = set_optimizer(opt, model)
